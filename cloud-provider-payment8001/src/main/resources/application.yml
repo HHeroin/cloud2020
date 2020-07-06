@@ -1,0 +1,14 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: cloud-payment-service
+
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://server.guowii.com:3306/cloud2020?useSSL=false
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
