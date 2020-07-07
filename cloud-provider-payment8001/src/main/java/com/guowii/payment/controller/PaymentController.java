@@ -5,19 +5,21 @@ import com.guowii.payment.entity.Payment;
 import com.guowii.payment.service.PaymentService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-@RestController("/payment")
+@RequestMapping("/payment")
+@RestController
 public class PaymentController {
 
     @Resource
     private PaymentService paymentService;
 
-    @GetMapping("/{id}")
-    public CommonResult<Payment> getPaymentById(@PathVariable(name = "id") String id) {
-        Payment payment = paymentService.getPaymentById(id);
-        return new CommonResult<>(200,"请求成功",payment);
+    @GetMapping("/{xxx}")
+    public CommonResult<Payment> getPaymentById(@PathVariable String xxx) {
+        Payment payment = paymentService.getPaymentById(xxx);
+        return new CommonResult<Payment>(200,"请求成功",payment);
     }
 }
