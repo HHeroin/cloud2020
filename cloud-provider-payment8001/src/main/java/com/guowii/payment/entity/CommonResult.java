@@ -13,8 +13,12 @@ public class CommonResult<T> implements Serializable {
 
     private static final long serialVersionUID = -9165107998205212161L;
 
+    public static final String SUCC_CODE = "00000";
+    public static final String FAIL_CODE = "99999";
+
+
     // 响应码
-    private Integer code;
+    private String code;
 
     // 响应消息
     private String message;
@@ -22,7 +26,7 @@ public class CommonResult<T> implements Serializable {
     // 响应数据
     private T data;
 
-    public CommonResult(Integer code, String message) {
+    public CommonResult(String code, String message) {
         this.code = code;
         this.message = message;
     }
