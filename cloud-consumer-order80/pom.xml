@@ -10,8 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>cloud-provider-payment8001</artifactId>
-
+    <artifactId>cloud-consumer-order80</artifactId>
 
     <packaging>jar</packaging>
 
@@ -73,8 +72,6 @@
             <artifactId>cloud-api-common</artifactId>
             <version>1.0.0</version>
         </dependency>
-
-
 
 
     </dependencies>

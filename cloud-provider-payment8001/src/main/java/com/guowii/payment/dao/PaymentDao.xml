@@ -4,11 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guowii.payment.dao.PaymentDao">
 
-    <select id="getPaymentById" resultType="com.guowii.payment.entity.Payment">
+    <select id="getPaymentById" resultType="com.guowii.common.entity.Payment">
         select * from payment where id = #{id}
     </select>
 
-    <insert id="create" parameterType="com.guowii.payment.entity.Payment" useGeneratedKeys="true" keyColumn="id" keyProperty="id"  >
+    <insert id="create" parameterType="com.guowii.common.entity.Payment" useGeneratedKeys="true" keyColumn="id" keyProperty="id"  >
         insert into payment (serial) values (#{serial})
     </insert>
 

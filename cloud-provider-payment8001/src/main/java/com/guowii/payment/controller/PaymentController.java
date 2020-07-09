@@ -1,7 +1,7 @@
 package com.guowii.payment.controller;
 
-import com.guowii.payment.entity.CommonResult;
-import com.guowii.payment.entity.Payment;
+import com.guowii.common.entity.CommonResult;
+import com.guowii.common.entity.Payment;
 import com.guowii.payment.service.PaymentService;
 import org.springframework.web.bind.annotation.*;
 

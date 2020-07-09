@@ -1,4 +1,4 @@
-package com.guowii.payment.entity;
+package com.guowii.common.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.guowii.payment.service;
 
+import com.guowii.common.entity.Payment;
 import com.guowii.payment.dao.PaymentDao;
-import com.guowii.payment.entity.Payment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
