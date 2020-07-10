@@ -7,7 +7,10 @@ CREATE TABLE `payment` (
 `id` BIGINT ( 20 ) NOT NULL AUTO_INCREMENT COMMENT 'ID', 
 `serial` VARCHAR ( 200 ) DEFAULT '', PRIMARY KEY ( `id` ) 
 ) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8
+
+windows上连接mysql5.5项目启动运行报错serverTimezone则在数据库执行 set global time_zone = '+8:00'; 
 ```
+
 
 ```xml
 当xml文件与Mapper接口文件在同一目录可不配置mybatis.mapper-locations
@@ -36,4 +39,5 @@ int create(Payment payment);
     insert into payment (serial) values (#{serial})
 </insert>
 ```
+
 
