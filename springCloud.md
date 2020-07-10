@@ -41,3 +41,100 @@ int create(Payment payment);
 ```
 
 
+
+### Order80
+
+1. 参照payment8001工程，在order微服务中使用restTemplate调用payment服务
+
+2. 配置类创建restTemplate
+
+   ```java
+   @Configuration
+   public class ApplicationContextConfig {
+   
+       @Bean
+       public RestTemplate restTemplate() {
+           return new RestTemplate();
+       }
+   }
+   ```
+
+3. OrderController
+   使用restTemplate的getForObject、PostForObject进行get/post请求payment接口
+
+   ```java
+   @RestController
+   @RequestMapping("/consumer")
+   public class OrderController {
+   
+       @Resource
+       private RestTemplate restTemplate;
+   
+       private static final String PAYMENT_URL = "http://localhost:8001/payment";
+   
+       @GetMapping("/payment/get/{id}")
+       public CommonResult<Payment> getPayment(@PathVariable("id") String id) {
+           return restTemplate.getForObject(PAYMENT_URL + "/get/" + id, CommonResult.class);
+       }
+   
+       @PostMapping("/payment/create")
+       public CommonResult<Integer> create(Payment payment) {
+           return restTemplate.postForObject(PAYMENT_URL + "/create",payment,CommonResult.class);
+       }
+   }
+   ```
+
+
+
+### Eureka7001注册中心单机版
+
+[Eureka wiki]: https://github.com/Netflix/eureka/wiki
+
+![Eureka High level Architecture](./images/eureka_architecture.png)
+
+1. pom依赖
+
+   ```xml
+   <!--eureka server-->
+   <dependency>
+     <groupId>org.springframework.cloud</groupId>
+     <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+   </dependency>
+   ```
+
+2. yml配置
+
+   ```yml
+   server:
+     port: 7001
+   
+   spring:
+     application:
+       name: cloud-eureka-server
+   
+   eureka:
+     instance:
+       hostname: localhost
+       prefer-ip-address: true
+     client:
+       register-with-eureka: false
+       fetch-registry: false
+       service-url:
+         defaultZone: http://${spring.application.name}:${server.port}/eureka/
+   ```
+
+   
+
+3. 主启动类添加`@EnableEurekaServer`
+
+   ```java
+   @SpringBootApplication
+   @EnableEurekaServer
+   public class Eureka7001 {
+       public static void main(String[] args) {
+           SpringApplication.run(Eureka7001.class,args);
+       }
+   }
+   ```
+
+   
