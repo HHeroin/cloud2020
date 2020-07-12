@@ -137,4 +137,183 @@ int create(Payment payment);
    }
    ```
 
+
+### payment8001 order80进驻Eureka
+
+1. 启动类增加`@EnableEurekaClient`注解
+
+   ```java
+   @SpringBootApplication
+   @EnableEurekaClient
+   public class Payment8001 {
+       public static void main(String[] args) {
+           SpringApplication.run(Payment8001.class,args);
+       }
+   }
+   ```
+
+   
+
+2. 修改配置文件application.yml
+
+   ```yml
+   eureka:
+     client:
+       fetch-registry: true
+       register-with-eureka: true
+       service-url:
+         defaultZone: http://localhost:7001/eureka
+   ```
+
+3. 一次启动Eureka7001及payment8001 order80微服务
+   ![localhoost:7001](E:\java2020\cloud2020\images\eureka 微服务进驻.png)
+
+### Eureka集群环境搭建
+
+原理：相互注册、互相守望
+
+1. 修改host文件
+
+   ```txt
+   127.0.0.1	eureka7001.com
+   127.0.0.1	eureka7002.com
+   ```
+
+   
+
+2. 修改配置文件
+
+   ```yml
+   eureka:
+     instance:
+       hostname: eureka7001.com
+     client:
+       register-with-eureka: false
+       fetch-registry: true
+       service-url:
+         defaultZone: http://eureka7002.com:7002/eureka/
+   ```
+
+3. payment及order微服务修改注册中心地址
+
+   ```yml
+   defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/
+   ```
+
+### order80通过restTemplate通过微服务名调用payment
+
+1. 配置类中restTemplate添加负载均衡注解@LoadBalanced
+
+   ```java
+   @Bean
+   @LoadBalanced
+   public RestTemplate restTemplate() {
+       return new RestTemplate();
+   }
+   ```
+
+   
+
+2. 将payment服务url替换为微服务名
+
+   ```java
+   @RestController
+   @RequestMapping("/consumer")
+   public class OrderController {
+   
+       @Resource
+       private RestTemplate restTemplate;
+   
+       //private static final String PAYMENT_URL = "http://localhost:8001";
+       private static final String PAYMENT_URL = "http://CLOUD-PAYMENT-SERVICE";
+   
+   
+       @GetMapping("/payment/get/{id}")
+       public CommonResult<Payment> getPayment(@PathVariable("id") String id) {
+           return restTemplate.getForObject(PAYMENT_URL + "/payment/get/" + id, CommonResult.class);
+       }
+   
+       @PostMapping("/payment/create")
+       public CommonResult<Integer> create(Payment payment) {
+           return restTemplate.postForObject(PAYMENT_URL + "/payment/create",payment,CommonResult.class);
+       }
+   }
+   ```
+
+### DiscoveryClient服务发现
+
+获取注册中心有哪些微服务及微服务实例的具体信息（uri port ）
+
+1. 注解开启服务发现
+
+   ```
+   @SpringBootApplication
+   @EnableEurekaClient
+   @EnableDiscoveryClient
+   public class Payment8001 {
+       public static void main(String[] args) {
+           SpringApplication.run(Payment8001.class,args);
+       }
+   }
+   
+   ```
+
+   
+
+2. 代码中直接注入DiscoveryClient对象
+
+   `discoveryClient.getServices() `获取所有服务ID列表
+
+   `discoveryClient.getInstances(String serviceId)`  获取某一serviceId的实例信息
+
+   ```java
+   @Autowired
+   private DiscoveryClient discoveryClient;
+   
+   @GetMapping("/discovery")
+       public Object getDiscoveryClient() {
+           List<String> services = discoveryClient.getServices();
+           for (String service : services) {
+               List<ServiceInstance> instances = discoveryClient.getInstances(service);
+               log.info("instances--{} :{},url",service,instances);
+               for (ServiceInstance instance : instances) {
+                   log.info("uri:{}",instance.getUri());
+               }
+           }
+           return services;
+       }
+   ```
+
+   
+
+### Eureka自我保护机制
+
+当一个微服务不可用时，Eureka不会立刻清理，依旧会对该微服务的信息进行保存
+
+关闭自我保护机制
+
+1. 修改Eureka Server
+
+   ```
+   eureka:
+     server:
+       # 关闭自我保护机制
+       enable-self-preservation: false
+       # 剔除检测时间
+       eviction-interval-timer-in-ms: 2000
+   ```
+
+   
+
+2. 修改Eureka Client
+
+   ```
+   eureka:
+     instance:
+       # 服务过期时间 （告诉注册中心超过这个时间没有收到心跳则剔除：默认90s）
+       lease-expiration-duration-in-seconds: 1
+       # 发送心跳时间 （告诉注册中心我还存活:默认30s）
+       lease-renewal-interval-in-seconds: 1
+   ```
+
    

@@ -10,7 +10,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>cloud-consumer-order80</artifactId>
+    <artifactId>cloud-provider-payment8002</artifactId>
+
 
     <packaging>jar</packaging>
 
@@ -27,7 +28,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!--Eureka-->
+        <!--Eureka客户端-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -78,6 +79,8 @@
             <artifactId>cloud-api-common</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+
 
 
     </dependencies>
