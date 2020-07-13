@@ -316,4 +316,78 @@ int create(Payment payment);
        lease-renewal-interval-in-seconds: 1
    ```
 
+
+### 使用Zookeeper替代Eureka注册中心
+
+1. zookeeper快速安装
+
+   ```cmd
+   docker run --name zk -d -p 2181:2181 --privileged zookeeper:3.6.0
    
+   docker exec -it zk /bin/bash
+   cd bin
+   ./zkCli.sh
+   ```
+
+2. payment8003进驻 zookeeper
+
+   - pom.xml
+
+     ```xml
+     <!--zookeeper-->
+             <dependency>
+                 <groupId>org.springframework.cloud</groupId>
+                 <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+                 <exclusions>
+                     <!--排除自带版本-->
+                     <exclusion>
+                         <groupId>org.apache.zookeeper</groupId>
+                         <artifactId>zookeeper</artifactId>
+                     </exclusion>
+                 </exclusions>
+             </dependency>
+     
+             <!--使用与zookeeper服务器版本一致客户端-->
+             <dependency>
+                 <groupId>org.apache.zookeeper</groupId>
+                 <artifactId>zookeeper</artifactId>
+                 <version>3.4.14</version>
+             </dependency>
+     
+             <!--web-->
+             <dependency>
+                 <groupId>org.springframework.boot</groupId>
+                 <artifactId>spring-boot-starter-web</artifactId>
+             </dependency>
+     
+     
+             <!--actuator-->
+             <dependency>
+                 <groupId>org.springframework.boot</groupId>
+                 <artifactId>spring-boot-starter-actuator</artifactId>
+             </dependency>
+     ```
+
+   - application.yml
+
+     ```
+     server:
+       port: 8003
+     
+     spring:
+       application:
+         name: cloud-payment-service
+       cloud:
+         zookeeper:
+           connect-string: server.guowii.com:2181
+     ```
+
+     
+
+   - 启动类添加`EnableDiscoveryClient`注解
+
+   - 启动微服务查看zookeeper目录节点
+
+     ![](E:\java2020\cloud2020\images\payment-zookeeper.png)
+
+3. order80调用payment8003
