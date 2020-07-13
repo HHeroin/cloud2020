@@ -166,7 +166,7 @@ int create(Payment payment);
    ```
 
 3. 一次启动Eureka7001及payment8001 order80微服务
-   ![localhoost:7001](E:\java2020\cloud2020\images\eureka 微服务进驻.png)
+   ![localhoost:7001](./images/eureka 微服务进驻.png)
 
 ### Eureka集群环境搭建
 
@@ -335,37 +335,40 @@ int create(Payment payment);
 
      ```xml
      <!--zookeeper-->
-             <dependency>
-                 <groupId>org.springframework.cloud</groupId>
-                 <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
-                 <exclusions>
-                     <!--排除自带版本-->
-                     <exclusion>
-                         <groupId>org.apache.zookeeper</groupId>
-                         <artifactId>zookeeper</artifactId>
-                     </exclusion>
-                 </exclusions>
-             </dependency>
-     
-             <!--使用与zookeeper服务器版本一致客户端-->
-             <dependency>
+     <dependency>
+         <groupId>org.springframework.cloud</groupId>
+         <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+         <exclusions>
+             <!--排除自带版本-->
+             <exclusion>
                  <groupId>org.apache.zookeeper</groupId>
                  <artifactId>zookeeper</artifactId>
-                 <version>3.4.14</version>
-             </dependency>
+             </exclusion>
+         </exclusions>
+     </dependency>
      
-             <!--web-->
-             <dependency>
-                 <groupId>org.springframework.boot</groupId>
-                 <artifactId>spring-boot-starter-web</artifactId>
-             </dependency>
+     <!--使用与zookeeper服务器版本一致客户端-->
+     <dependency>
+         <groupId>org.apache.zookeeper</groupId>
+         <artifactId>zookeeper</artifactId>
+         <version>3.4.14</version>
+         <exclusions>
+             <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-log4j12</artifactId>
+             </exclusion>
+             <exclusion>
+                 <groupId>org.slf4j</groupId>
+                 <artifactId>slf4j-api</artifactId>
+             </exclusion>
+         </exclusions>
+     </dependency>
      
-     
-             <!--actuator-->
-             <dependency>
-                 <groupId>org.springframework.boot</groupId>
-                 <artifactId>spring-boot-starter-actuator</artifactId>
-             </dependency>
+     <!----------这个starter中zookeeper是3.5.3-beta 与服务器3.4也能正常匹配，可只引入以下一个starter----------->
+     <dependency>
+         <groupId>org.springframework.cloud</groupId>
+         <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+     </dependency>
      ```
 
    - application.yml
@@ -384,10 +387,10 @@ int create(Payment payment);
 
      
 
-   - 启动类添加`EnableDiscoveryClient`注解
+   - 启动类添加`@EnableDiscoveryClient`注解
 
    - 启动微服务查看zookeeper目录节点
 
-     ![](E:\java2020\cloud2020\images\payment-zookeeper.png)
+     ![](./images/payment-zookeeper.png)
 
 3. order80调用payment8003
