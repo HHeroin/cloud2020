@@ -317,7 +317,7 @@ int create(Payment payment);
    ```
 
 
-### 使用Zookeeper替代Eureka注册中心
+### 使用Zookeeper替代Eureka注册中心(payment8003)
 
 1. zookeeper快速安装
 
@@ -327,6 +327,13 @@ int create(Payment payment);
    docker exec -it zk /bin/bash
    cd bin
    ./zkCli.sh
+   
+   zk命令：
+   ls path  查看节点
+   get path 获取节点值
+   stats path 查看节点状态
+   create [-e -s] path val 创建节点（-e 临时节点  -s 顺序节点【自动添加编号】）
+   
    ```
 
 2. payment8003进驻 zookeeper
@@ -393,4 +400,145 @@ int create(Payment payment);
 
      ![](./images/payment-zookeeper.png)
 
-3. order80调用payment8003
+   ### cloud-consumerzk-order80调用zookeeper上注册的微服务
+
+   1. pom
+
+      ```xml
+      <!--zookeeper-->
+      <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+      </dependency>
+      
+      
+      <!--web-->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+      
+      
+      <!--actuator-->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-actuator</artifactId>
+      </dependency>
+      
+      ```
+
+      
+
+   2. yml
+
+      ```yml
+      server:
+        port: 80
+      spring:
+        application:
+          name: cloud-consumer-service
+      
+        cloud:
+          zookeeper:
+            connect-string: localhost:2181
+      ```
+
+      
+
+   3. 启动类
+
+      ```java
+      @SpringBootApplication
+      @EnableDiscoveryClient
+      public class ZkOrder {
+          public static void main(String[] args) {
+              SpringApplication.run(ZkOrder.class,args);
+          }
+      }
+      ```
+
+      
+
+   4. RestTemplate配置类
+
+      ```java
+      @Configuration
+      public class ApplicationContextConfig {
+      
+          @Bean
+          @LoadBalanced
+          public RestTemplate restTemplate() {
+              return new RestTemplate();
+          }
+      }
+      ```
+
+      
+
+   5. controller
+
+      ```java
+      @RestController
+      @RequestMapping("/order")
+      public class OrderController {
+      
+          @Resource
+          private RestTemplate restTemplate;
+      
+          private static final String PaymentService = "http://cloud-payment-service";
+      
+          @GetMapping("/payment/zk")
+          public String get() {
+              String result =  restTemplate.getForObject(PaymentService + "/payment/zk",String.class);
+              return result;
+          }
+      }
+      ```
+
+      
+
+   6. 测试 (zookeeper: ls /services)
+      ![zookeeper服务列表](./images/zk-service.png)
+      ![postman](./images/callzk.png)
+
+### 使用Consul替代Eureka注册中心(payment8004)
+
+1. consul安装使用
+
+   ```
+   1 在consul目录执行consul.exe agent -dev
+   2 访问localhost:8500
+   ```
+
+   ![](./images/install-consul.png)
+
+2. pom
+
+   ```xml
+   <!--consul注册中心-->
+   <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+   </dependency>
+   ```
+
+3. yml
+
+   ```yml
+   server:
+     port: 8004
+   spring:
+     application:
+       name: cloud-payment-service
+   
+     cloud:
+       consul:
+         host: localhost
+         port: 8500
+   ```
+
+   
+
+4. 启动添加`@DiscoveryClient`注解
+
+   ![service in consul](E:\java2020\cloud2020\images\service-consul.png)
