@@ -6,4 +6,4 @@ spring:
     name: cloud-payment-service
   cloud:
     zookeeper:
-      connect-string: server.guowii.com:2181
+      connect-string: localhost:2181
