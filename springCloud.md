@@ -400,10 +400,12 @@ int create(Payment payment);
 
      ![](./images/payment-zookeeper.png)
 
-   ### cloud-consumerzk-order80调用zookeeper上注册的微服务
+   
+
+### cloud-consumerzk-order80调用zookeeper上注册的微服务
 
    1. pom
-
+   
       ```xml
       <!--zookeeper-->
       <dependency>
@@ -430,7 +432,7 @@ int create(Payment payment);
       
 
    2. yml
-
+   
       ```yml
       server:
         port: 80
@@ -440,13 +442,13 @@ int create(Payment payment);
       
         cloud:
           zookeeper:
-            connect-string: localhost:2181
+         connect-string: localhost:2181
       ```
 
       
 
    3. 启动类
-
+   
       ```java
       @SpringBootApplication
       @EnableDiscoveryClient
@@ -460,7 +462,7 @@ int create(Payment payment);
       
 
    4. RestTemplate配置类
-
+   
       ```java
       @Configuration
       public class ApplicationContextConfig {
@@ -476,7 +478,7 @@ int create(Payment payment);
       
 
    5. controller
-
+   
       ```java
       @RestController
       @RequestMapping("/order")
@@ -496,7 +498,7 @@ int create(Payment payment);
       ```
 
       
-
+   
    6. 测试 (zookeeper: ls /services)
       ![zookeeper服务列表](./images/zk-service.png)
       ![postman](./images/callzk.png)
@@ -541,4 +543,60 @@ int create(Payment payment);
 
 4. 启动添加`@DiscoveryClient`注解
 
-   ![service in consul](E:\java2020\cloud2020\images\service-consul.png)
+   ![service in consul](./images/service-consul.png)
+
+
+
+### cloud-consumer-consul-order80调用consul微服务
+
+1. pom
+
+   ```xml
+   <dependency>
+     <groupId>org.springframework.cloud</groupId>
+     <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+   </dependency>
+   ```
+
+   
+
+2. yml
+
+   ```yml
+   server:
+     port: 80
+   
+   spring:
+     application:
+       name: cloud-order-service
+   
+     cloud:
+       consul:
+         host: localhost
+         port: 8500
+   ```
+
+   
+
+3. 启动类及配置类
+
+   ```java
+   1 启动类添加@EnableDiscoveryClient
+   2 配置RestTemplate(@Bean @LoadBalanced )
+   3 controller层
+   
+   @RestController
+   @RequestMapping("/order")
+   public class ConsulOrderController {
+       @Resource
+       private RestTemplate restTemplate;
+   
+       private static final String PAYMENT_SERVICE = "http://cloud-payment-service";
+   
+       @GetMapping("/payment/consul")
+       public String getFromConsul() {
+           return restTemplate.getForObject(PAYMENT_SERVICE + "/payment/consul",String.class);
+       }
+   }
+   ```
+
