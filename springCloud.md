@@ -600,3 +600,110 @@ int create(Payment payment);
    }
    ```
 
+### Ribbon实现服务负载均衡
+
+#### 负载均衡（Load Balance）
+
+概念：将用户请求平摊的分配到多个服务上，达到系统的高可用（HA）,常见的负载均衡有软件Nginx LVS 硬件F5等
+
+##### 集中式负载均衡
+
+​	在服务的提供方和服务的消费方提供独立的LB设施（F5、Nginx) , 由LB设施负责将用户请求按照某种策略转发到服务的提供方
+
+##### 进程内负载均衡
+
+​	将LB逻辑集成到服务消费方（Ribbon），消费方从服务注册中心获取哪些地址可用，然后自己从服务地址中挑选一个合适的服务器
+
+
+
+#### Ribbon核心组件IRule
+
+IRule:根据特定算法从服务列表中选取一个要访问的服务
+
+![IRule](/Users/guowii/workspace/cloud2020/images/Irule.png)
+
+#### cloud-consumer-order80自定义负载均衡策略
+
+Ribbon默认使用RoundRobin轮询算法
+
+1. 配置自定义规则类:在非@ComponentScan扫描包及子包下面建立配置类
+
+   ```java
+   package com.guowii.custom;
+   
+   @Configuration
+   public class CustomRule {
+   
+       // 自定义负载均衡路由规则
+       @Bean
+       public IRule getRule() {
+           return new RandomRule();
+       }
+   }
+   ```
+
+2. 在启动类上配置服务与负载均衡策略关系`@RibbonClient`
+
+   ```java
+   package com.guowii.order;
+   
+   import com.guowii.custom.CustomRule;
+   import org.springframework.boot.SpringApplication;
+   import org.springframework.boot.autoconfigure.SpringBootApplication;
+   import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+   import org.springframework.cloud.netflix.ribbon.RibbonClient;
+   
+   @SpringBootApplication
+   @EnableEurekaClient
+   @RibbonClient(name = "cloud-payment-service",configuration = CustomRule.class)
+   public class Order80 {
+   
+       public static void main(String[] args) {
+           SpringApplication.run(Order80.class,args);
+       }
+   }
+   ```
+
+   
+
+3. RestTemplate配置负载均衡及使用服务名调用payment
+
+#### 自定义负载均衡算法
+
+```java
+通过AtomicInteger原子整型类保存访问次数，atomicInteger.getAndIncrement自增访问次数保证线程安全，底层原理为CAS
+---------------------order80-orderController---------------------------------    
+    private final static AtomicInteger atomicInteger = new AtomicInteger(0);
+
+    @Resource
+    private DiscoveryClient discoveryClient;
+    
+    @GetMapping("/lb")
+    public CommonResult<Payment> getLbPayment() {
+        String serviceId = "cloud-payment-service";
+        // 访问次数每次+1，actomicInteger保证线程安全
+        int visitCount = atomicInteger.getAndIncrement();
+        // 获取所有服务实例
+        List<ServiceInstance> instanceList = discoveryClient.getInstances(serviceId);
+        // 轮询算法 本次访问服务 = 访问次数 % 服务数
+        int index = visitCount % instanceList.size();
+        ServiceInstance serviceInstance = instanceList.get(index);
+        URI uri = serviceInstance.getUri();
+        // 通过RestTemplate根据uri调用服务
+        ResponseEntity<CommonResult> responseEntity = restTemplate.getForEntity(uri + "/payment/get/1", CommonResult.class);
+        if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+            return responseEntity.getBody();
+        } else {
+            return new CommonResult<>();
+        }
+    }
+
+
+--------------------配置类不加@LoadBalanced注解----------------------------------
+    @Bean
+    //@LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+```
+
