@@ -707,3 +707,99 @@ Ribbon默认使用RoundRobin轮询算法
     }
 ```
 
+
+
+### openFeign调用微服务
+
+1. pom
+
+   ```xml
+   <!--openFeign-->
+   <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-openfeign</artifactId>
+   </dependency>
+   ```
+
+2. yml
+
+   ```yml
+   # openFeign超时设置
+   # openFegin日志级别配置
+   
+   server:
+     port: 80
+   
+   
+   eureka:
+     client:
+       fetch-registry: true
+       register-with-eureka: false
+       service-url:
+         #defaultZone: http://localhost:7001/eureka/
+         # 集群版配置
+         defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/
+   ```
+
+3. 启动类（使用`@EnableFeignClients`）
+
+   ```java
+   @SpringBootApplication
+   @EnableFeignClients
+   public class FeignOrder80 {
+       public static void main(String[] args) {
+           SpringApplication.run(FeignOrder80.class);
+       }
+   }
+   ```
+
+   
+
+4. openFeign配置类
+
+5. feignClient接口(`@FeignClient`)
+
+   ```
+   
+   @FeignClient("cloud-payment-service")
+   @Service
+   @RequestMapping("/payment")
+   public interface PaymentFeignClient {
+   
+       // pathVariable必须配置value否则会启动报错
+       @GetMapping("/get/{id}")
+       public CommonResult<Payment> getPaymentById(@PathVariable("id") String id);
+   
+       @PostMapping("/create")
+       public CommonResult<Integer> create(@RequestBody Payment payment);
+   }
+   ```
+
+   
+
+6. controller直接注入feignClient接口调用cloud-payment-service微服务
+
+   ```java
+   @RequestMapping("/consumer")
+   @RestController
+   public class OrderController {
+   
+       @Autowired
+       private PaymentFeignClient paymentFeignClient;
+   
+       @GetMapping("/feign/payment/get/{id}")
+       public CommonResult<Payment> getPaymentById(@PathVariable String id) {
+           return paymentFeignClient.getPaymentById(id);
+       }
+   
+       @PostMapping("/feign/payment/create")
+       public CommonResult<Integer> create(@RequestBody Payment payment) {
+           return paymentFeignClient.create(payment);
+       }
+   }
+   ```
+
+   
+
+
+
