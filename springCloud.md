@@ -724,9 +724,6 @@ Ribbon默认使用RoundRobin轮询算法
 2. yml
 
    ```yml
-   # openFeign超时设置
-   # openFegin日志级别配置
-   
    server:
      port: 80
    
@@ -755,9 +752,49 @@ Ribbon默认使用RoundRobin轮询算法
 
    
 
-4. openFeign配置类
+4. 超时配置
 
-5. feignClient接口(`@FeignClient`)
+   ```yml
+   ribbon:
+     ReadTimeout: 10000
+     ConnectTimeout: 3000
+     
+   # 使用如下配置也行
+   feign:
+     client:
+       config:
+         default:
+           connectTimeout: 15000
+           readTimeout: 3000
+           loggerLevel: basic
+     
+   ```
+
+   
+
+5. feign调用日志配置
+
+   ```yml
+   # 配置feignClient日志打印级别为debug
+   logging:
+     level:
+       com.guowii.consumer.service.PaymentFeignClient: debug
+   ```
+
+   ```java
+   @AutoConfigureAfter
+   public class FeignClientConfig {
+   
+       @Bean
+       public Logger.Level feignLoggerLevel() {
+           return Logger.Level.FULL;
+       }
+   }
+   ```
+
+   
+
+6. feignClient接口(`@FeignClient`)
 
    ```
    
@@ -777,7 +814,7 @@ Ribbon默认使用RoundRobin轮询算法
 
    
 
-6. controller直接注入feignClient接口调用cloud-payment-service微服务
+7. controller直接注入feignClient接口调用cloud-payment-service微服务
 
    ```java
    @RequestMapping("/consumer")

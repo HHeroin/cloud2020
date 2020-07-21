@@ -22,4 +22,9 @@ public class OrderController {
     public CommonResult<Integer> create(@RequestBody Payment payment) {
         return paymentFeignClient.create(payment);
     }
+
+    @GetMapping("/feign/payment/timeOut")
+    public String timeOut() {
+        return paymentFeignClient.timeOut();
+    }
 }

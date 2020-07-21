@@ -7,8 +7,22 @@ eureka:
     fetch-registry: true
     register-with-eureka: false
     service-url:
-      #defaultZone: http://localhost:7001/eureka/
+      defaultZone: http://localhost:7001/eureka/
       # 集群版配置
-      defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/
+      #defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/
 
+ribbon:
+  ReadTimeout: 10000
+  ConnectTimeout: 3000
 
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 5000
+        loggerLevel: FULL
+
+logging:
+  level:
+    com.guowii.consumer.service.PaymentFeignClient: debug

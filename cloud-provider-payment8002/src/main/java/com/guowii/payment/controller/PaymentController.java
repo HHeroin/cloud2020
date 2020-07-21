@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @RequestMapping("/payment")
 @RestController
@@ -37,5 +38,15 @@ public class PaymentController {
         } else {
             return new CommonResult<>(CommonResult.SUCC_CODE, "插入失败" + serverPort, i);
         }
+    }
+
+    @GetMapping("/timeOut")
+    public String timeOut() {
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return serverPort;
     }
 }

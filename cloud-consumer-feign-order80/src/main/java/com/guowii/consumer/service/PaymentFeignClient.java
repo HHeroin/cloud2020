@@ -16,4 +16,7 @@ public interface PaymentFeignClient {
 
     @PostMapping("/create")
     public CommonResult<Integer> create(@RequestBody Payment payment);
+
+    @GetMapping("/timeOut")
+    String timeOut();
 }
