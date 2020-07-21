@@ -620,7 +620,7 @@ int create(Payment payment);
 
 IRule:根据特定算法从服务列表中选取一个要访问的服务
 
-![IRule](/Users/guowii/workspace/cloud2020/images/Irule.png)
+![IRule](./images/Irule.png)
 
 #### cloud-consumer-order80自定义负载均衡策略
 
@@ -711,6 +711,8 @@ Ribbon默认使用RoundRobin轮询算法
 
 ### openFeign调用微服务
 
+Feign是一个声明式的Web服务客户端,让编写Web服务客户端变得非常容易,只需  创建一个接口并在接口上添加注解即可
+
 1. pom
 
    ```xml
@@ -752,7 +754,7 @@ Ribbon默认使用RoundRobin轮询算法
 
    
 
-4. 超时配置
+4. 超时配置（消费侧愿意等待的时间）
 
    ```yml
    ribbon:
@@ -772,7 +774,10 @@ Ribbon默认使用RoundRobin轮询算法
 
    
 
-5. feign调用日志配置
+5. feign调用日志配置(feignClient日志级别需要配置为debug才会输出feign日志)
+
+   + 配置feignClient日志级别
+   + 配置feign日志级别
 
    ```yml
    # 配置feignClient日志打印级别为debug
@@ -782,7 +787,13 @@ Ribbon默认使用RoundRobin轮询算法
    ```
 
    ```java
-   @AutoConfigureAfter
+   /*
+    * NONE, No logging (DEFAULT).
+    * BASIC, Log only the request method and URL and the response status code and execution time.
+    * HEADERS, Log the basic information along with request and response headers.
+    * FULL, Log the headers, body, and metadata for both requests and responses.
+   */
+   @Configuration
    public class FeignClientConfig {
    
        @Bean
